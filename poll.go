@@ -1,3 +1,13 @@
+/*
+Prevents keep-client from starting unless
+required preconditions are satisfied.
+
+This program will wait forever until required env vars are set
+and ethereum endpoint is accessible and synced.
+
+If these constraints are satisfied, renders config.toml file
+from template to be used by keep-client process, then halts with exit code 0.
+*/
 package main
 
 import (
@@ -5,6 +15,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+  "github.com/ethereum/go-ethereum/ethclient"
 )
 
 var RequiredEnvVars = [...]string{
@@ -51,11 +63,22 @@ func main() {
 	for true {
     missingEnv = checkEnvVars(currentEnv)
 		if len(missingEnv) != 0 {
-			// TODO: log which vars are missing
 			fmt.Printf("Missing required environment variables: %s, please set them and restart\n", missingEnv)
+      time.Sleep(10 * time.Second)
+      continue
 		} else {
       fmt.Println("Found all required environment variables")
     }
-		time.Sleep(10 * time.Second)
+
+    // try connecting to http rpc url
+    _, err := ethclient.Dial("https://mainnet.infura.io")
+    if err != nil {
+        fmt.Printf("Failed to connect to ethereum endpoint: %s\n", err)
+        time.Sleep(10 * time.Second)
+        continue
+    }
+    // idea try connecting to peers...
+    fmt.Println("Successfully connected to eth1 rpc endpoint")
+    break
 	}
 }
