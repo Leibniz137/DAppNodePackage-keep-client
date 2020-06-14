@@ -135,11 +135,16 @@ func main() {
 			}
 		}
 
-		// try connecting to http rpc url
-		// TODO: connect to ws url as well!
+		_, err := ethclient.Dial(wsRpcUrl)
+		if err != nil {
+			fmt.Printf("Failed to connect to ethereum endpoint using websockets: %s\n", err)
+			time.Sleep(10 * time.Second)
+			continue
+		}
+
 		client, err := ethclient.Dial(httpRpcUrl)
 		if err != nil {
-			fmt.Printf("Failed to connect to ethereum endpoint: %s\n", err)
+			fmt.Printf("Failed to connect to ethereum endpoint using http: %s\n", err)
 			time.Sleep(10 * time.Second)
 			continue
 		}
