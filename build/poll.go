@@ -11,6 +11,7 @@ from template to be used by keep-client process, then halts with exit code 0.
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"html/template"
@@ -30,6 +31,9 @@ var RequiredEnvVars = [...]string{
 	"PEERS",
 	"WS_RPC_URL",
 }
+
+const TEMPLATE_PATH = "./config.toml.tmpl"
+const CONFIG_PATH = "./config.toml"
 
 func checkEnvVars(currentEnv []string) []string {
 
@@ -78,11 +82,20 @@ type Config struct {
 }
 
 func renderTemplate(config Config) {
-	t, err := template.ParseFiles("config.toml.tmpl")
+	t, err := template.ParseFiles(TEMPLATE_PATH)
 	if err != nil {
     panic(err)
 	}
-	t.Execute(os.Stdout, config)
+
+	f, err := os.Create(CONFIG_PATH)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	t.Execute(w, config)
+	w.Flush()
 }
 
 
