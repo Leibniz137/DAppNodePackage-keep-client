@@ -13,6 +13,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"math/big"
 	"os"
 	"strings"
@@ -58,7 +59,41 @@ func checkEnvVars(currentEnv []string) []string {
 	return errors
 }
 
+type Config struct {
+	// 0x...
+	Address string
+
+	// http://ropsten.dnp.dappnode.eth:8545/
+	HttpRpcUrl string
+
+	// ws://ropsten.dnp.dappnode.eth:8546/
+	WsRpcUrl string
+
+	/*
+	[
+	  "/dns4/bootstrap-1.core.keep.test.boar.network/tcp/3001/ipfs/16Uiu2HAkuTUKNh6HkfvWBEkftZbqZHPHi3Kak5ZUygAxvsdQ2UgG",
+	  "/dns4/bootstrap-2.core.keep.test.boar.network/tcp/3001/ipfs/16Uiu2HAmQirGruZBvtbLHr5SDebsYGcq6Djw7ijF3gnkqsdQs3wK"
+	]
+	*/
+	Peers []string
+}
+
+func renderTemplate(config Config) {
+	t, err := template.ParseFiles("config.toml.tmpl")
+	if err != nil {
+    panic(err)
+	}
+	t.Execute(os.Stdout, config)
+}
+
+
 func main() {
+
+	var address string
+	var httpRpcUrl string
+	var peers []string
+	var wsRpcUrl string
+
 	currentEnv := os.Environ()
 
 	var missingEnv []string
@@ -72,15 +107,25 @@ func main() {
 			fmt.Println("Found all required environment variables")
 		}
 
-		var rpcUrl string
-		for _, envVar := range currentEnv {
-			if strings.HasPrefix(envVar, "HTTP_RPC_URL") {
-				rpcUrl = strings.Split(envVar, "=")[1]
+		for _, envVarStr := range currentEnv {
+			envVar := strings.Split(envVarStr, "=")
+			key := envVar[0]
+			value := envVar[1]
+			switch key {
+			case "ETHEREUM_ADDRESS":
+				address = value
+			case "HTTP_RPC_URL":
+				httpRpcUrl = value
+			case "WS_RPC_URL":
+				wsRpcUrl = value
+			case "PEERS":
+				peers = strings.Split(value, ",")
 			}
 		}
 
 		// try connecting to http rpc url
-		client, err := ethclient.Dial(rpcUrl)
+		// TODO: connect to ws url as well!
+		client, err := ethclient.Dial(httpRpcUrl)
 		if err != nil {
 			fmt.Printf("Failed to connect to ethereum endpoint: %s\n", err)
 			time.Sleep(10 * time.Second)
@@ -105,4 +150,12 @@ func main() {
 
 		time.Sleep(10 * time.Second)
 	}
+
+	config := Config{
+		Address: address,
+		HttpRpcUrl: httpRpcUrl,
+		Peers: peers,
+		WsRpcUrl: wsRpcUrl,
+	}
+	renderTemplate(config)
 }

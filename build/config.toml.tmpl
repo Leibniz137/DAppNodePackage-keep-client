@@ -1,0 +1,28 @@
+# Ethereum host connection info.
+[ethereum]
+URL = "{{ .WsRpcUrl }}"
+URLRPC = "{{ .HttpRpcUrl }}"
+
+# Keep operator Ethereum account.
+[ethereum.account]
+Address = "{{ .Address }}"
+KeyFile = "/mnt/keystore/keep_wallet.json"
+
+# Keep contract addresses configuration.
+[ethereum.ContractAddresses]
+KeepRandomBeaconOperator = "0x440626169759ad6598cd53558F0982b84A28Ad7a"
+TokenStaking = "0xEb2bA3f065081B6459A6784ba8b34A1DfeCc183A"
+KeepRandomBeaconService = "0xF9AEdd99357514d9D1AE389A65a4bd270cBCb56c"
+
+# Keep network configuration.
+[LibP2P]
+Peers = [
+{{- range .Peers }}
+  "{{ . }}",
+{{- end }}
+]
+Port = 3919
+
+# Storage is encrypted
+[Storage]
+DataDir = "/mnt/persistence"
