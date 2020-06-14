@@ -46,7 +46,6 @@ func checkEnvVars(currentEnv []string) []string {
 				found = true
 				envValue = strings.Split(envVar, "=")
 				if strings.TrimSpace(envValue[1]) == "" {
-					fmt.Println("empty value")
 					empty = true
 				}
 			}
