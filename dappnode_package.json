@@ -1,0 +1,14 @@
+{
+  "name": "keep-client.public.dappnode.eth",
+  "version": "0.1.0",
+  "description": "play for keeps!",
+  "type": "service",
+  "author": "thenateway",
+  "categories": [
+    "Developer tools"
+  ],
+  "links": {
+    "homepage": "https://your-project-homepage-or-docs.io"
+  },
+  "license": "GLP-3.0"
+}
