@@ -15,16 +15,18 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"math/big"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 var RequiredEnvVars = [...]string{
-	"ETHEREUM_ADDRESS",
 	"HTTP_RPC_URL",
 	"KEEP_ETHEREUM_PASSWORD",
 	"LOG_LEVEL",
@@ -34,6 +36,9 @@ var RequiredEnvVars = [...]string{
 
 const TEMPLATE_PATH = "./config.toml.tmpl"
 const CONFIG_PATH = "./config.toml"
+const KEYSTORE = "/mnt/keystore"
+var ACCOUNT_PATH = fmt.Sprintf("%s/keep_wallet.json", KEYSTORE)
+
 
 func checkEnvVars(currentEnv []string) []string {
 
@@ -99,12 +104,51 @@ func renderTemplate(config Config) {
 }
 
 
+/*
+createKeyStore creates a keystore with a single account
+and then returns that account
+*/
+func createKeyStore(password string, accountPath string) (accounts.Account, error) {
+
+  ks := keystore.NewKeyStore(KEYSTORE, keystore.StandardScryptN, keystore.StandardScryptP)
+  account, err := ks.NewAccount(password)
+  if err != nil {
+    return accounts.Account{}, err
+  }
+
+  err = os.Rename(account.URL.Path, accountPath)
+	if err != nil {
+		return accounts.Account{}, err
+	}
+
+  account.URL.Path = accountPath
+  return account, nil
+}
+
+
+func loadKeyStore(password string, filePath string) (accounts.Account, error) {
+  ks := keystore.NewKeyStore(KEYSTORE, keystore.StandardScryptN, keystore.StandardScryptP)
+  jsonBytes, err := ioutil.ReadFile(filePath)
+  if err != nil {
+    return accounts.Account{}, err
+  }
+
+  account, err := ks.Import(jsonBytes, password, password)
+  if err != nil {
+    return accounts.Account{}, err
+  }
+
+  return account, nil
+}
+
+
 func main() {
 
-	var address string
 	var httpRpcUrl string
 	var peers []string
 	var wsRpcUrl string
+	var password string
+	var account accounts.Account
 
 	currentEnv := os.Environ()
 
@@ -124,14 +168,14 @@ func main() {
 			key := envVar[0]
 			value := envVar[1]
 			switch key {
-			case "ETHEREUM_ADDRESS":
-				address = value
 			case "HTTP_RPC_URL":
 				httpRpcUrl = value
 			case "WS_RPC_URL":
 				wsRpcUrl = value
 			case "PEERS":
 				peers = strings.Split(value, ",")
+			case "KEEP_ETHEREUM_PASSWORD":
+				password = value
 			}
 		}
 
@@ -160,16 +204,36 @@ func main() {
 		}
 		zero := big.NewInt(int64(0))
 		blockNumber := header.Number
-		if blockNumber.Cmp(zero) == 1 {
-			fmt.Println("Eth endpoint is synchronized, starting keep client...")
-			break
+		if blockNumber.Cmp(zero) != 1 {
+			fmt.Println("Eth endpoint still synchronizing, waiting...")
+			time.Sleep(10 * time.Second)
+			continue
 		}
 
-		time.Sleep(10 * time.Second)
+		// load operator account (or create if necessary)
+		if _, err := os.Stat(ACCOUNT_PATH); os.IsNotExist(err) {
+			account, err = createKeyStore(password, ACCOUNT_PATH)
+			if err != nil {
+				fmt.Printf("Failed to create operator's ethereum account: %s\n", err)
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			fmt.Printf("No existing account found. Created new operator account with address %s\n", account.Address.Hex())
+		} else {
+			account, err = loadKeyStore(password, ACCOUNT_PATH)
+			if err != nil {
+				fmt.Printf("Failed to load operator's ethereum account: %s\n", err)
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			fmt.Printf("Loaded existing operator account with address: %s\n", account.Address.Hex())
+		}
+
+		break
 	}
 
 	config := Config{
-		Address: address,
+		Address: account.Address.Hex(),
 		HttpRpcUrl: httpRpcUrl,
 		Peers: peers,
 		WsRpcUrl: wsRpcUrl,
