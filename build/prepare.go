@@ -27,6 +27,7 @@ import (
 )
 
 var RequiredEnvVars = [...]string{
+	"ANNOUNCED_ADDRESSES",
 	"HTTP_RPC_URL",
 	"KEEP_ETHEREUM_PASSWORD",
 	"LOG_LEVEL",
@@ -68,8 +69,15 @@ func checkEnvVars(currentEnv []string) []string {
 }
 
 type Config struct {
+	/*
+	Use your dappnode's static ip address or dns name
+
+	eg. "/ip4/80.20.40.233/tcp/3919"
+	*/
+	AnnouncedAddresses []string
+
 	// 0x...
-	Address string
+	EthAddress string
 
 	// http://ropsten.dnp.dappnode.eth:8545/
 	HttpRpcUrl string
@@ -89,7 +97,7 @@ type Config struct {
 func renderTemplate(config Config) {
 	t, err := template.ParseFiles(TEMPLATE_PATH)
 	if err != nil {
-    panic(err)
+		panic(err)
 	}
 
 	f, err := os.Create(CONFIG_PATH)
@@ -103,47 +111,46 @@ func renderTemplate(config Config) {
 	w.Flush()
 }
 
-
 /*
 createKeyStore creates a keystore with a single account
 and then returns that account
 */
 func createKeyStore(password string, accountPath string) (accounts.Account, error) {
 
-  ks := keystore.NewKeyStore(KEYSTORE, keystore.StandardScryptN, keystore.StandardScryptP)
-  account, err := ks.NewAccount(password)
-  if err != nil {
-    return accounts.Account{}, err
-  }
-
-  err = os.Rename(account.URL.Path, accountPath)
+	ks := keystore.NewKeyStore(KEYSTORE, keystore.StandardScryptN, keystore.StandardScryptP)
+	account, err := ks.NewAccount(password)
 	if err != nil {
 		return accounts.Account{}, err
 	}
 
-  account.URL.Path = accountPath
-  return account, nil
-}
+	err = os.Rename(account.URL.Path, accountPath)
+	if err != nil {
+		return accounts.Account{}, err
+	}
 
+	account.URL.Path = accountPath
+	return account, nil
+}
 
 func loadKeyStore(password string, filePath string) (accounts.Account, error) {
-  ks := keystore.NewKeyStore(KEYSTORE, keystore.StandardScryptN, keystore.StandardScryptP)
-  jsonBytes, err := ioutil.ReadFile(filePath)
-  if err != nil {
-    return accounts.Account{}, err
-  }
+	ks := keystore.NewKeyStore(KEYSTORE, keystore.StandardScryptN, keystore.StandardScryptP)
+	jsonBytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return accounts.Account{}, err
+	}
 
-  account, err := ks.Import(jsonBytes, password, password)
-  if err != nil {
-    return accounts.Account{}, err
-  }
+	account, err := ks.Import(jsonBytes, password, password)
 
-  return account, nil
+	// NOTE: ErrAccountAlreadyExists hit only on linux/container (not on OS X)
+	if err != nil && err != keystore.ErrAccountAlreadyExists {
+		return accounts.Account{}, err
+	}
+
+	return account, nil
 }
 
-
 func main() {
-
+	var announcedAddresses []string
 	var httpRpcUrl string
 	var peers []string
 	var wsRpcUrl string
@@ -168,6 +175,8 @@ func main() {
 			key := envVar[0]
 			value := envVar[1]
 			switch key {
+			case "ANNOUNCED_ADDRESSES":
+				announcedAddresses = strings.Split(value, ",")
 			case "HTTP_RPC_URL":
 				httpRpcUrl = value
 			case "WS_RPC_URL":
@@ -195,11 +204,11 @@ func main() {
 
 		fmt.Println("Successfully connected to eth1 rpc endpoint")
 
-    // check block number to see if eth client is synced
+		// check block number to see if eth client is synced
 		header, err := client.HeaderByNumber(context.Background(), nil)
 		if err != nil {
 			fmt.Printf("Failed to retrieve latest block header %s\n", err)
-      time.Sleep(10 * time.Second)
+			time.Sleep(10 * time.Second)
 			continue
 		}
 		zero := big.NewInt(int64(0))
@@ -233,10 +242,11 @@ func main() {
 	}
 
 	config := Config{
-		Address: account.Address.Hex(),
+		AnnouncedAddresses: announcedAddresses,
+		EthAddress:    account.Address.Hex(),
 		HttpRpcUrl: httpRpcUrl,
-		Peers: peers,
-		WsRpcUrl: wsRpcUrl,
+		Peers:      peers,
+		WsRpcUrl:   wsRpcUrl,
 	}
 	renderTemplate(config)
 }
