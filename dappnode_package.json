@@ -1,14 +1,15 @@
 {
   "name": "keep-client.public.dappnode.eth",
   "version": "0.1.0",
-  "description": "play for keeps!",
+  "description": "Run a Keep Random Beacon client",
   "type": "service",
   "author": "thenateway",
   "categories": [
-    "Developer tools"
+    "Developer tools",
+    "Keep"
   ],
   "links": {
-    "homepage": "https://your-project-homepage-or-docs.io"
+    "homepage": "https://github.com/Leibniz137/DAppNodePackage-keep-client"
   },
   "license": "GLP-3.0"
 }
