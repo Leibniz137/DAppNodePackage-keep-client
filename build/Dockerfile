@@ -15,7 +15,7 @@ RUN go get github.com/ethereum/go-ethereum/ethclient \
 COPY ./config.toml.tmpl $APPDIR
 COPY ./entrypoint.sh $APPDIR
 
-FROM novy4/keep-client:latest
+FROM keepnetwork/keep-client:v1.3.0
 
 ENV APPDIR /usr/src/app/
 COPY --from=0 $APPDIR $APPDIR
