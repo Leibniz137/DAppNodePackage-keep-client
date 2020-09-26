@@ -9,6 +9,7 @@ COPY ./prepare.go $APPDIR
 ENV CGO_ENABLED=0
 RUN go get github.com/ethereum/go-ethereum/ethclient \
   && go get github.com/ethereum/go-ethereum/accounts \
+  && go get github.com/ethereum/go-ethereum/accounts/keystore \
   && go build prepare.go
 
 COPY ./config.toml.tmpl $APPDIR
