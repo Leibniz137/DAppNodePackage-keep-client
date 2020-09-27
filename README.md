@@ -6,10 +6,10 @@ see: https://keep.network/
 This package requires a public, static ip address.
 
 ## Install
-Access this link using your dappnode wifi:
-http://my.dappnode/#/installer/%2Fipfs%2FQmZgGj5prKg29Uoke5A5pR7qdeTGKf8CaPCf2LJ9nm3m1t
+Access this link using your dappnode wifi/vpn:
+http://my.dappnode/#/installer/%2Fipfs%2FQmWgo3pgmQ53zq9RYfFteirm4jWWYfPvuvRtoysc7iHLzK
 
-current ipfs hash `QmZgGj5prKg29Uoke5A5pR7qdeTGKf8CaPCf2LJ9nm3m1t`
+current ipfs hash `QmWgo3pgmQ53zq9RYfFteirm4jWWYfPvuvRtoysc7iHLzK`
 
 ## Quick Start
 1. Set `KEEP_ETHEREUM_PASSWORD` and `ANNOUNCED_ADDRESSES` environment variables in the Config section of the package.
