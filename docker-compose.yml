@@ -11,6 +11,8 @@ services:
       - 'WS_RPC_URL=ws://fullnode.dappnode:8546/'
     image: 'keep-client.public.dappnode.eth:0.1.0'
     restart: always
+    ports:
+      - '3919:3919'
     volumes:
       - 'persistence:/mnt/persistence'
       - 'keystore:/mnt/keystore'
