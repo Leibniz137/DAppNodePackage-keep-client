@@ -1,9 +1,15 @@
 # Keep Random Beacon Dappnode Package
 This dappnode package will allow you to participate in the keep random beacon.
-see: https://keep.network/
+
+see:
+- https://keep.network/
+- https://discordapp.com/invite/wYezN7v (see 🥩Staking channels)
 
 ## Requirements
 This package requires a public, static ip address.
+
+## Risks
+see: https://hackmd.io/@protocollayer/BkUBl7zIw#Random-beacon
 
 ## Install
 Access this link using your dappnode wifi/vpn:
@@ -32,6 +38,8 @@ If announcing multiple addresses, the address should be listed as a comma-delimi
 3. GOTO https://dashboard.keep.network/
 5. Delegate your keep tokens to the operator address
 6. Authorize the Random Beacon contract
+7. Send some eth to the operator address
+  - ~0.5 eth is fine to start with, but be sure to monitor the balance!
 
 ## Extracting your operator account
 The operator account is generated automatically for you when this package is initialized.
