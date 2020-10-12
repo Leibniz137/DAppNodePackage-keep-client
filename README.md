@@ -13,9 +13,9 @@ see: https://hackmd.io/@protocollayer/BkUBl7zIw#Random-beacon
 
 ## Install
 Access this link using your dappnode wifi/vpn:
-http://my.dappnode/#/installer/%2Fipfs%2FQmaD1caWFmJwTu94VjtqgAraRgkicxhxeQwMZDY7CVkRdV
+http://my.dappnode/#/installer/%2Fipfs%2FQmZCjXFbUuMkhWGaEuZ7x6uPE4ABo8sNR2UcCuzf7uuGG9
 
-current ipfs hash `QmaD1caWFmJwTu94VjtqgAraRgkicxhxeQwMZDY7CVkRdV`
+current ipfs hash `QmZCjXFbUuMkhWGaEuZ7x6uPE4ABo8sNR2UcCuzf7uuGG9`
 
 ## Quick Start
 1. Set `KEEP_ETHEREUM_PASSWORD` and `ANNOUNCED_ADDRESSES` environment variables in the Config section of the package.
