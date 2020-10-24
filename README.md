@@ -14,9 +14,9 @@ This amount will decrease over time until it reaches 10,000 KEEP ([source](https
 
 # Install
 Access this link using your dappnode wifi/vpn:
-http://my.dappnode/#/installer/%2Fipfs%2FQmUwN3obuWiLZ1WbmE7PwuPg6ejpXXAGH7uM2e9c23uPLr
+http://my.dappnode/#/installer/%2Fipfs%2FQmd2CjLMNhg9QZWr8o3fEQ3CSatuvdmxUzJkYGeFCSBPJR
 
-current ipfs hash `QmUwN3obuWiLZ1WbmE7PwuPg6ejpXXAGH7uM2e9c23uPLr`
+current ipfs hash `Qmd2CjLMNhg9QZWr8o3fEQ3CSatuvdmxUzJkYGeFCSBPJR`
 
 ## Quick Start
 1. Set `KEEP_ETHEREUM_PASSWORD` and `ANNOUNCED_ADDRESSES` environment variables in the Config section of the package.

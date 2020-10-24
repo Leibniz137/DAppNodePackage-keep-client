@@ -1,6 +1,6 @@
 {
   "name": "keep-client.public.dappnode.eth",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Run a Keep Random Beacon client",
   "type": "service",
   "author": "thenateway",
